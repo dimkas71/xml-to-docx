@@ -10,6 +10,4 @@ This is a project written in Python for generating ***a register of sick leave c
 4. Activate a virtual environment: ```source venv/bin/activate```
 5. Install dependencies: ```pip install -r requierments.txt```
 6. Run converter: ```python converter.py``` The file with name: ***export.xml*** must be located in the current directory
-7. The file with name ***reestr.docx*** will be produced as a result.
-
-
+7. The file with a name ***reestr.docx*** will be created in the current directory
