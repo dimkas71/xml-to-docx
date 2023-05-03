@@ -1,21 +1,26 @@
 from dataclasses import dataclass
 from datetime import date
+
 from datetime import datetime
 from xml.etree import ElementTree as ET
 
 from docx import Document
 from docx.enum.text import WD_ALIGN_PARAGRAPH
 
+EMPTY_STRING = ""
+DATE_TIME_FORMAT_STRING = "%Y-%m-%dT%H:%M:%S"
+EMPTY_DATE = date(1, 1, 1)
+
 
 @dataclass
 class HealthInfo:
-    health_number: str = ""
-    ident_number: str = ""
-    first_name: str = ""
-    second_name: str = ""
-    surname: str = ""
-    begin_date: date = date(1, 1, 1)
-    end_date: date = date(1, 1, 1)
+    health_number: str = EMPTY_STRING
+    ident_number: str = EMPTY_STRING
+    first_name: str = EMPTY_STRING
+    second_name: str = EMPTY_STRING
+    surname: str = EMPTY_STRING
+    begin_date: date = EMPTY_DATE
+    end_date: date = EMPTY_DATE
 
 
 def load_health_info(path: str) -> list[HealthInfo]:
@@ -23,13 +28,13 @@ def load_health_info(path: str) -> list[HealthInfo]:
     root = tree.getroot()
     health_info: list[HealthInfo] = []
     for e in root.iter('Row'):
-        health_number: str = ""
-        ident_number: str = ""
-        first_name: str = ""
-        second_name: str = ""
-        surname: str = ""
-        begin_date: date = date(1, 1, 1)
-        end_date: date = date(1, 1, 1)
+        health_number: str = EMPTY_STRING
+        ident_number: str = EMPTY_STRING
+        first_name: str = EMPTY_STRING
+        second_name: str = EMPTY_STRING
+        surname: str = EMPTY_STRING
+        begin_date: date = EMPTY_DATE
+        end_date: date = EMPTY_DATE
         for child in e:
             if child.tag == 'WIC_NUM':
                 health_number = child.text
@@ -42,9 +47,9 @@ def load_health_info(path: str) -> list[HealthInfo]:
             if child.tag == 'NP_PATRONYMIC':
                 surname = child.text
             if child.tag == 'WIC_DT_BEGIN':
-                begin_date = datetime.strptime(child.text, "%Y-%m-%dT%H:%M:%S")
+                begin_date = datetime.strptime(child.text, DATE_TIME_FORMAT_STRING)
             if child.tag == 'WIC_DT_END':
-                end_date = datetime.strptime(child.text, "%Y-%m-%dT%H:%M:%S")
+                end_date = datetime.strptime(child.text, DATE_TIME_FORMAT_STRING)
         health_info.append(
             HealthInfo(health_number, ident_number, first_name, second_name, surname, begin_date, end_date))
     return health_info
@@ -85,5 +90,5 @@ def save_health_info(source: str, target: str) -> None:
     document.save(target)
 
 
-if (__name__ == '__main__'):
+if __name__ == '__main__':
     save_health_info('export.xml', 'reestr.docx')
