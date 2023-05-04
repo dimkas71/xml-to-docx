@@ -1,3 +1,5 @@
+import argparse
+
 from dataclasses import dataclass
 from datetime import date
 
@@ -99,4 +101,20 @@ def save_health_info(source: str, target: str) -> None:
 
 
 if __name__ == '__main__':
-    save_health_info('export.xml', 'reestr.docx')
+
+    parser = argparse.ArgumentParser(
+        prog="Xml to docx converter",
+        description="Convert xml file to docx as register of sick leave certificates"
+    )
+
+    # Configure parser
+    parser.add_argument(
+        "-i", "--input", help="input file in format xml. Default value: export.xml", default='export.xml'
+    )
+    parser.add_argument(
+        "-o", "--output", help="output file. file name for saving data. Default value: reestr.docx", default='reestr.docx'
+    )
+
+    args = parser.parse_args()
+
+    save_health_info(args.input, args.output)
