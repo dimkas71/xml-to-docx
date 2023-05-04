@@ -7,6 +7,8 @@ from xml.etree import ElementTree as ET
 from docx import Document
 from docx.enum.text import WD_ALIGN_PARAGRAPH
 
+from pathlib import Path
+
 EMPTY_STRING = ""
 DATE_TIME_FORMAT_STRING = "%Y-%m-%dT%H:%M:%S"
 EMPTY_DATE = date(1, 1, 1)
@@ -23,9 +25,15 @@ class HealthInfo:
     end_date: date = EMPTY_DATE
 
 
-def load_health_info(path: str) -> list[HealthInfo]:
-    tree = ET.parse("export.xml")
-    root = tree.getroot()
+def load_health_info(path: str | bytes | Path) -> list[HealthInfo]:
+    if isinstance(path, str) or isinstance(path, Path):
+        tree = ET.parse(path)
+        root = tree.getroot()
+    elif isinstance(path, bytes):
+        root = ET.fromstring(path.decode())
+    else:
+        raise ValueError(f"path can be only str or bytes or Path like object")
+
     health_info: list[HealthInfo] = []
     for e in root.iter('Row'):
         health_number: str = EMPTY_STRING
