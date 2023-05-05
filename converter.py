@@ -6,8 +6,8 @@ from datetime import date
 from datetime import datetime
 from xml.etree import ElementTree as ET
 
-from docx import Document
-from docx.enum.text import WD_ALIGN_PARAGRAPH
+from docx import Document # type: ignore
+from docx.enum.text import WD_ALIGN_PARAGRAPH # type: ignore
 
 from pathlib import Path
 
@@ -47,19 +47,19 @@ def load_health_info(path: str | bytes | Path) -> list[HealthInfo]:
         end_date: date = EMPTY_DATE
         for child in e:
             if child.tag == 'WIC_NUM':
-                health_number = child.text
+                health_number = child.text if not child.text is None else EMPTY_STRING
             if child.tag == 'NP_NUMIDENT':
-                ident_number = child.text
+                ident_number = child.text if not child.text is None else EMPTY_STRING
             if child.tag == 'NP_SURNAME':
-                first_name = child.text
+                first_name = child.text if not child.text is None else EMPTY_STRING
             if child.tag == 'NP_NAME':
-                second_name = child.text
+                second_name = child.text if not child.text is None else EMPTY_STRING
             if child.tag == 'NP_PATRONYMIC':
-                surname = child.text
+                surname = child.text if not child.text is None else EMPTY_STRING
             if child.tag == 'WIC_DT_BEGIN':
-                begin_date = datetime.strptime(child.text, DATE_TIME_FORMAT_STRING)
+                begin_date = datetime.strptime(child.text if not child.text is None else EMPTY_STRING, DATE_TIME_FORMAT_STRING)
             if child.tag == 'WIC_DT_END':
-                end_date = datetime.strptime(child.text, DATE_TIME_FORMAT_STRING)
+                end_date = datetime.strptime(child.text if not child.text is None else EMPTY_STRING, DATE_TIME_FORMAT_STRING)
         health_info.append(
             HealthInfo(health_number, ident_number, first_name, second_name, surname, begin_date, end_date))
     return health_info
@@ -101,7 +101,6 @@ def save_health_info(source: str, target: str) -> None:
 
 
 if __name__ == '__main__':
-
     parser = argparse.ArgumentParser(
         prog="Xml to docx converter",
         description="Convert xml file to docx as register of sick leave certificates"
@@ -112,7 +111,8 @@ if __name__ == '__main__':
         "-i", "--input", help="input file in format xml. Default value: export.xml", default='export.xml'
     )
     parser.add_argument(
-        "-o", "--output", help="output file. file name for saving data. Default value: reestr.docx", default='reestr.docx'
+        "-o", "--output", help="output file. file name for saving data. Default value: reestr.docx",
+        default='reestr.docx'
     )
 
     args = parser.parse_args()
