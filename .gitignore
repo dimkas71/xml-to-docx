@@ -3,3 +3,4 @@
 venv/
 .idea/
 reestr.docx
+__pycache__/
