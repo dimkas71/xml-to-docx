@@ -11,6 +11,7 @@ from docx import Document  # type: ignore
 from docx.enum.text import WD_ALIGN_PARAGRAPH  # type: ignore
 
 from pathlib import Path
+from urllib import request
 
 _EMPTY_STRING: str = ""
 _EMPTY_DATE: date = date(1, 1, 1)
@@ -123,15 +124,25 @@ if __name__ == '__main__':
         description="Convert xml file to docx as register of sick leave certificates"
     )
 
+    input_group = parser.add_mutually_exclusive_group()
+
     # Configure parser
-    parser.add_argument(
+    input_group.add_argument(
         "-i", "--input", help="input file in format xml. Default value: export.xml", default='export.xml'
     )
+
+    input_group.add_argument(
+        "-u", "--url", help="url address in format http://service.com:<port>/export"
+    )
+
     parser.add_argument(
         "-o", "--output", help="output file. file name for saving data. Default value: reestr.docx",
         default='reestr.docx'
     )
 
     args = parser.parse_args()
-
-    save_health_info(args.input, args.output)
+    if args.input:
+        save_health_info(args.input, args.output)
+    if args.url:
+        with request.urlopen(args.url) as reader:
+            save_health_info(reader.read().decode('utf-8'), args.output)
