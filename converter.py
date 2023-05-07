@@ -12,9 +12,8 @@ from docx.enum.text import WD_ALIGN_PARAGRAPH  # type: ignore
 
 from pathlib import Path
 
-EMPTY_STRING = ""
-DATE_TIME_FORMAT_STRING = "%Y-%m-%dT%H:%M:%S"
-EMPTY_DATE = date(1, 1, 1)
+_EMPTY_STRING: str = ""
+_EMPTY_DATE: date = date(1, 1, 1)
 
 
 class IData(Protocol):
@@ -29,16 +28,17 @@ class IData(Protocol):
 
 @dataclass
 class HealthInfo:
-    health_number: str = EMPTY_STRING
-    ident_number: str = EMPTY_STRING
-    first_name: str = EMPTY_STRING
-    second_name: str = EMPTY_STRING
-    surname: str = EMPTY_STRING
-    begin_date: date = EMPTY_DATE
-    end_date: date = EMPTY_DATE
+    health_number: str = _EMPTY_STRING
+    ident_number: str = _EMPTY_STRING
+    first_name: str = _EMPTY_STRING
+    second_name: str = _EMPTY_STRING
+    surname: str = _EMPTY_STRING
+    begin_date: date = _EMPTY_DATE
+    end_date: date = _EMPTY_DATE
 
 
 def load_health_info(path: str | bytes | Path) -> Sequence[IData]:
+    _DATE_TIME_FORMAT_STRING: str = "%Y-%m-%dT%H:%M:%S"
     match path:
         case str():
             tree = ET.parse(path)
@@ -53,30 +53,30 @@ def load_health_info(path: str | bytes | Path) -> Sequence[IData]:
 
     health_info: list[HealthInfo] = []
     for e in root.iter('Row'):
-        health_number: str = EMPTY_STRING
-        ident_number: str = EMPTY_STRING
-        first_name: str = EMPTY_STRING
-        second_name: str = EMPTY_STRING
-        surname: str = EMPTY_STRING
-        begin_date: date = EMPTY_DATE
-        end_date: date = EMPTY_DATE
+        health_number: str = _EMPTY_STRING
+        ident_number: str = _EMPTY_STRING
+        first_name: str = _EMPTY_STRING
+        second_name: str = _EMPTY_STRING
+        surname: str = _EMPTY_STRING
+        begin_date: date = _EMPTY_DATE
+        end_date: date = _EMPTY_DATE
         for child in e:
             if child.tag == 'WIC_NUM':
-                health_number = child.text if not child.text is None else EMPTY_STRING
+                health_number = child.text if not child.text is None else _EMPTY_STRING
             if child.tag == 'NP_NUMIDENT':
-                ident_number = child.text if not child.text is None else EMPTY_STRING
+                ident_number = child.text if not child.text is None else _EMPTY_STRING
             if child.tag == 'NP_SURNAME':
-                first_name = child.text if not child.text is None else EMPTY_STRING
+                first_name = child.text if not child.text is None else _EMPTY_STRING
             if child.tag == 'NP_NAME':
-                second_name = child.text if not child.text is None else EMPTY_STRING
+                second_name = child.text if not child.text is None else _EMPTY_STRING
             if child.tag == 'NP_PATRONYMIC':
-                surname = child.text if not child.text is None else EMPTY_STRING
+                surname = child.text if not child.text is None else _EMPTY_STRING
             if child.tag == 'WIC_DT_BEGIN':
-                begin_date = datetime.strptime(child.text if not child.text is None else EMPTY_STRING,
-                                               DATE_TIME_FORMAT_STRING)
+                begin_date = datetime.strptime(child.text if not child.text is None else _EMPTY_STRING,
+                                               _DATE_TIME_FORMAT_STRING)
             if child.tag == 'WIC_DT_END':
-                end_date = datetime.strptime(child.text if not child.text is None else EMPTY_STRING,
-                                             DATE_TIME_FORMAT_STRING)
+                end_date = datetime.strptime(child.text if not child.text is None else _EMPTY_STRING,
+                                             _DATE_TIME_FORMAT_STRING)
         health_info.append(
             HealthInfo(health_number, ident_number, first_name, second_name, surname, begin_date, end_date))
     return health_info
