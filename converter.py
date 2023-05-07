@@ -4,16 +4,27 @@ from dataclasses import dataclass
 from datetime import date
 
 from datetime import datetime
+from typing import Protocol, Iterable, Sequence
 from xml.etree import ElementTree as ET
 
-from docx import Document # type: ignore
-from docx.enum.text import WD_ALIGN_PARAGRAPH # type: ignore
+from docx import Document  # type: ignore
+from docx.enum.text import WD_ALIGN_PARAGRAPH  # type: ignore
 
 from pathlib import Path
 
 EMPTY_STRING = ""
 DATE_TIME_FORMAT_STRING = "%Y-%m-%dT%H:%M:%S"
 EMPTY_DATE = date(1, 1, 1)
+
+
+class IData(Protocol):
+    first_name: str
+    second_name: str
+    surname: str
+    health_number: str
+    ident_number: str
+    begin_date: date
+    end_date: date
 
 
 @dataclass
@@ -27,14 +38,18 @@ class HealthInfo:
     end_date: date = EMPTY_DATE
 
 
-def load_health_info(path: str | bytes | Path) -> list[HealthInfo]:
-    if isinstance(path, str) or isinstance(path, Path):
-        tree = ET.parse(path)
-        root = tree.getroot()
-    elif isinstance(path, bytes):
-        root = ET.fromstring(path.decode())
-    else:
-        raise ValueError(f"path can be only str or bytes or Path like object")
+def load_health_info(path: str | bytes | Path) -> Sequence[IData]:
+    match path:
+        case str():
+            tree = ET.parse(path)
+            root = tree.getroot()
+        case Path():
+            tree = ET.parse(path)
+            root = tree.getroot()
+        case bytes():
+            root = ET.fromstring(path.decode())
+        case _:
+            raise ValueError(f"path can be only str or bytes or Path like object")
 
     health_info: list[HealthInfo] = []
     for e in root.iter('Row'):
@@ -57,9 +72,11 @@ def load_health_info(path: str | bytes | Path) -> list[HealthInfo]:
             if child.tag == 'NP_PATRONYMIC':
                 surname = child.text if not child.text is None else EMPTY_STRING
             if child.tag == 'WIC_DT_BEGIN':
-                begin_date = datetime.strptime(child.text if not child.text is None else EMPTY_STRING, DATE_TIME_FORMAT_STRING)
+                begin_date = datetime.strptime(child.text if not child.text is None else EMPTY_STRING,
+                                               DATE_TIME_FORMAT_STRING)
             if child.tag == 'WIC_DT_END':
-                end_date = datetime.strptime(child.text if not child.text is None else EMPTY_STRING, DATE_TIME_FORMAT_STRING)
+                end_date = datetime.strptime(child.text if not child.text is None else EMPTY_STRING,
+                                             DATE_TIME_FORMAT_STRING)
         health_info.append(
             HealthInfo(health_number, ident_number, first_name, second_name, surname, begin_date, end_date))
     return health_info
